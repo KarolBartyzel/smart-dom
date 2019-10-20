@@ -4,7 +4,8 @@ import { Text, IconButton, ActivityIndicator } from 'react-native-paper';
 import * as Permissions from 'expo-permissions';
 import { Audio } from 'expo-av';
 import * as FileSystem from 'expo-file-system';
-import { Buffer } from 'buffer';
+import * as Speech from 'expo-speech';
+import { GOOGLE_URL } from 'react-native-dotenv'
 
 import FadeInView from './../components/FadeInView';
 
@@ -31,15 +32,31 @@ const recordingOptions = {
 
 const audioOptions = {
     allowsRecordingIOS: true,
-    interruptionModeIOS: Audio.INTERRUPTION_MODE_IOS_DO_NOT_MIX,
+    interruptionModeIOS: Audio.INTERRUPTION_MODE_IOS_DUCK_OTHERS ,
     playsInSilentModeIOS: true,
     shouldDuckAndroid: true,
-    interruptionModeAndroid: Audio.INTERRUPTION_MODE_ANDROID_DO_NOT_MIX,
+    interruptionModeAndroid: Audio.INTERRUPTION_MODE_ANDROID_DUCK_OTHERS,
     playThroughEarpieceAndroid: true,
-    staysActiveInBackground: false,
+    staysActiveInBackground: true,
 };
 
+async function synthesizeSpeech(text) {
+    // const { uri } = await FileSystem.downloadAsync(
+    //     `${GOOGLE_URL}/textToSpeech?text=${encodeURIComponent(text)}`,
+    //     `${FileSystem.documentDirectory}synthesizedSpeechTmp.mp3`
+    // );
+    // const soundObject = new Audio.Sound();
+    // try {
+    //     await soundObject.loadAsync({ uri });
+    //     await soundObject.playAsync();
+    // } catch (error) {}
+    Speech.speak(text, {
+        language: 'pl',
+    });
+}
+
 export default function HomeScreen() {
+    const [audioRecordingPermission, setAudioRecordingPermission] = useState(null);
     const [recording, setRecording] = useState(null);
     const [isRecording, setIsRecording] = useState(false);
     const [isFetchingTranscription, setIsFetchingTranscription] = useState(false);
@@ -47,18 +64,23 @@ export default function HomeScreen() {
     const [successfulCommand, setSuccessfulCommand] = useState(null);
     const [failedCommand, setFailedCommand] = useState(null);
 
+    React.useEffect(() => {
+        askForMicrophonePermission();
+    }, []);
+
     async function askForMicrophonePermission() {
         const { status } = await Permissions.askAsync(Permissions.AUDIO_RECORDING);
+        await Audio.setAudioModeAsync(audioOptions);
+        setAudioRecordingPermission(status === "granted");
         return status === "granted";
     }
 
     async function startRecording() {
-        if (!askForMicrophonePermission()) {
+        if (!audioRecordingPermission && !askForMicrophonePermission()) {
             return;
         }
         setSuccessfulCommand(null);
         setFailedCommand(null);
-        await Audio.setAudioModeAsync(audioOptions);
         const recording = new Audio.Recording();
         setRecording(recording);
 
@@ -83,12 +105,12 @@ export default function HomeScreen() {
                 return resolveCommand(commandTranscriptions)
                     .then((command) => {
                         setSuccessfulCommand(command);
-                        // Syntezuj mowę
+                        synthesizeSpeech(command);
                     });
             })
             .catch((error) => {
                 setFailedCommand(error.message);
-                // Syntezuj mowę
+                synthesizeSpeech(error.message);
             });
     }
 
@@ -99,10 +121,9 @@ export default function HomeScreen() {
             const xhr = new XMLHttpRequest();
             xhr.onload = () => {
                 setIsFetchingTranscription(false);
-                const { status, response } = xhr;
-                console.log(response, status);
-                console.log('lala');
-                if (status === 200 && response.length > 0) {
+                const response = JSON.parse(xhr.response);
+
+                if (xhr.status === 200 && response) {
                     setIsResolvingCommand(true);
                     resolve(response);
                 }
@@ -111,17 +132,16 @@ export default function HomeScreen() {
                 }
             };
             xhr.onerror = (error) => {
-                reject(new Error(response));
+                reject(new Error(error));
             };
 
-            xhr.open('POST', 'CHANGE');
+            xhr.open('POST', `${GOOGLE_URL}/speechToText`);
             xhr.setRequestHeader('Content-Type', 'audio/x-wav');
             xhr.send({ uri });
         });
     }
 
     async function resolveCommand(commandTranscriptions) {
-        console.log(typeof commandTranscriptions);
         const { transcript, confidence } = commandTranscriptions[0];
         setIsResolvingCommand(false);
         return Promise.resolve(`Komenda "${transcript}" wykonana pomyślnie`);
@@ -184,6 +204,7 @@ const styles = StyleSheet.create({
         flex: 1,
         alignItems: 'center',
         justifyContent: 'center',
+        textAlign: 'center',
         backgroundColor: '#fff',
     },
     header: {

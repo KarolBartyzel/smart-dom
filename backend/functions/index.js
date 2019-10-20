@@ -1,13 +1,32 @@
 const fs = require('fs');
-const path = require('path');
-const os = require('os');
-const Busboy = require('busboy');
-const axios = require('axios');
+const util = require('util');
 const functions = require('firebase-functions');
-const speech = require('@google-cloud/speech');
+const speechToText = require('@google-cloud/speech');
+const textToSpeech = require('@google-cloud/text-to-speech');
+const uuidv4 = require('uuid/v4');
+
+const writeFile = util.promisify(fs.writeFile);
+
+exports.textToSpeech = functions.https.onRequest(async (req, res) => {
+    const textToSpeechClient = new textToSpeech.TextToSpeechClient();
+    const { text } = req.query;
+    console.log('lkala');
+    console.log(text);
+
+    const [response] = await textToSpeechClient.synthesizeSpeech({
+        input: { text },
+        voice: { languageCode: 'pl', ssmlGender: 'NEUTRAL' },
+        audioConfig: { audioEncoding: 'MP3' },
+    });
+
+    const fileName = `/tmp/${uuidv4()}.mp3`;
+    console.log(fileName);
+    await writeFile(fileName, response.audioContent, 'binary');
+    res.status(200).sendFile(fileName);
+})
 
 exports.speechToText = functions.https.onRequest(async (req, res) => {
-    const client = new speech.SpeechClient();
+    const speechToTextClient = new speechToText.SpeechClient();
 
     const request = {
         audio: {
@@ -20,6 +39,6 @@ exports.speechToText = functions.https.onRequest(async (req, res) => {
         },
     };
 
-    const [response] = await client.recognize(request);
+    const [response] = await speechToTextClient.recognize(request);
     res.json(response.results.length ? response.results[0].alternatives : null);
 });
