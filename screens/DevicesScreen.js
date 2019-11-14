@@ -1,14 +1,15 @@
 import React from 'react';
-import { ExpoConfigView } from '@expo/samples';
+import { View } from 'react-native';
+import { Text } from 'react-native-paper';
 
-export default function SettingsScreen() {
-  /**
-   * Go ahead and delete ExpoConfigView and replace it with your content;
-   * we just wanted to give you a quick view of your config.
-   */
-  return <ExpoConfigView />;
+export default function DevicesScreen(props) {
+    return (
+        <View>
+            <Text>Urządzenia</Text>
+        </View>
+    )
 }
 
-SettingsScreen.navigationOptions = {
-  title: 'app.json',
+DevicesScreen.navigationOptions = {
+    header: null
 };

@@ -5,6 +5,7 @@ import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import Colors from './constants/Colors';
 import OrdersScreen from './screens/OrdersScreen';
 import DevicesScreen from './screens/DevicesScreen';
+import HistoryScreen from './screens/HistoryScreen';
 
 const OrdersStack = createStackNavigator(
     {
@@ -13,7 +14,7 @@ const OrdersStack = createStackNavigator(
 );
 
 OrdersStack.navigationOptions = {
-    tabBarLabel: 'Rozkazy',
+    tabBarLabel: 'Polecenia',
     tabBarIcon: ({ focused }) => (
         <Ionicons
             name={'md-microphone'}
@@ -46,9 +47,30 @@ DevicesStack.navigationOptions = {
 
 DevicesStack.path = '';
 
+const HistoryStack = createStackNavigator(
+    {
+        History: HistoryScreen,
+    },
+);
+
+HistoryStack.navigationOptions = {
+    tabBarLabel: 'Historia',
+    tabBarIcon: ({ focused }) => (
+        <MaterialCommunityIcons
+            name={'history'}
+            size={26}
+            style={{ marginBottom: -3 }}
+            color={focused ? Colors.tabIconSelected : Colors.tabIconDefault}
+        />
+    ),
+};
+
+HistoryStack.path = '';
+
 const tabNavigator = createBottomTabNavigator({
     OrdersStack,
-    DevicesStack,
+    HistoryStack,
+    // DevicesStack,
 });
 
 tabNavigator.path = '';

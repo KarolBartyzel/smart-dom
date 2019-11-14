@@ -1,11 +1,11 @@
 import { AppLoading } from 'expo';
-import React, { useState } from 'react';
+import React from 'react';
 import { Platform, StatusBar, StyleSheet, View } from 'react-native';
 
 import AppNavigator from './AppNavigator';
 
 export default function App(props) {
-    const [isLoadingComplete, setLoadingComplete] = useState(false);
+    const [isLoadingComplete, setLoadingComplete] = React.useState(false);
 
     if (!isLoadingComplete && !props.skipLoadingScreen) {
         return (

@@ -10,3 +10,4 @@ npm-debug.*
 web-build/
 web-report/
 google-speech-to-text-key.json
+.env.json
