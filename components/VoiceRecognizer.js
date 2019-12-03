@@ -149,7 +149,7 @@ export default function VoiceRecognizer(props) {
     if (isRecognizingSpeech) {
         return (
             <>
-                <ActivityIndicator size="large" color={Colors.lightBlue400} />
+                <ActivityIndicator size="large" color={Colors.yellow400} />
                 <Text>Rozpoznaję mowę...</Text>
             </>
         );

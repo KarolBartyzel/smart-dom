@@ -18,7 +18,7 @@ export default function HistoryScreen(props) {
     async function fetchHistory() {
         const HISTORY_KEY = 'smart-dom:history';
         const history = JSON.parse(await AsyncStorage.getItem(HISTORY_KEY)) || [];
-        setHistory(history.map((item, index) => ({ ...item, key: String(index) })));
+        setHistory(history.reverse().map((item, index) => ({ ...item, key: String(index) })));
     }
     
     if (history === null || history === undefined) {
@@ -60,12 +60,8 @@ HistoryScreen.navigationOptions = {
 
 const styles = StyleSheet.create({
     container: {
-        height: '100%',
         alignItems: 'center',
-        justifyContent: 'center'
-    },
-    list: {
-        height: '100%',
+        justifyContent: 'center',
     },
     listItem: {
         flexDirection: 'row',

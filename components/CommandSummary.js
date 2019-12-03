@@ -20,14 +20,14 @@ async function synthesizeSpeech(text) {
 }
 
 export default function CommandSummary(props) {
-    const summary = props.error ? `Coś poszło nie tak: "${props.error}"` : props.command === null ? `Transkrypcja "${props.transcript}" nie została rozpoznana.` : `Transkrypcja "${props.transcript}" została rozpoznana.\nKomenda "${props.command}" została wykonana.`
+    const summary = props.error ? `Coś poszło nie tak:\n\n"${props.error}"` : props.command === null ? `Transkrypcja nie została rozpoznana\n\n"${props.transcript}"` : `Transkrypcja została rozpoznana:\n\n"${props.transcript}"\n\nKomenda została wykonana:\n\n"${props.command}"`;
     React.useEffect(() => {
         synthesizeSpeech(summary);
     }, []);
     
     return (
         <>
-            <Text>{summary}</Text>
+            <Text style={styles.summary}>{summary}</Text>
             <Button style={styles.button} mode="contained" onPress={props.startNewCommand}>Wydaj nowe polecenie</Button>
         </>
     );
@@ -36,5 +36,8 @@ export default function CommandSummary(props) {
 const styles = StyleSheet.create({
     button: {
         margin: 10
+    },
+    summary: {
+        textAlign: 'center'
     }
 });
