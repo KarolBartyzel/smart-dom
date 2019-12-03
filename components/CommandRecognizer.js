@@ -49,7 +49,7 @@ export default function CommandRecognizer(props) {
 
     return (
         <>
-            <ActivityIndicator size="large" color={Colors.lightBlue400} />
+            <ActivityIndicator size="large" color={Colors.orange400} />
             <Text>Rozpoznaję polecenie...</Text>
         </>
     );
